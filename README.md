@@ -22,36 +22,39 @@ The dataset is split into **training** and **testing** sets at a **9:1** ratio.
 The following preprocessing steps were applied:
 
 1. **Sequence Truncation and Elimination**  
-   After analyzing the distribution of protein sequence length(statistics shown in the figure below), it can be found that protein sequences vary greatly in length. Sequences longer than a predefined maximum length (set to the 95th percentile of all sequence lengths) are truncated, while extremely short sequences that may lack sufficient structural information are removed. 
+   After analyzing the distribution of protein sequence length(statistics shown in the figure below), it can be found that protein sequences vary widely in length. Sequences longer than a predefined maximum length (set to the 95th percentile of all sequence lengths) are truncated, while extremely short sequences that may lack sufficient structural information are removed. 
 ![distribution of protein sequence length](figs/dtb.png)
 2. **Padding**  
    All sequences are padded with a special token (`<PAD>`) so that they have equal lengths. This allows batch processing and compatibility with the LSTM model.
-3. **Encoding Amino Acids**  
-  Each amino acid was mapped to an integer index using a vocabulary dictionary.  
-
+3. **Tokenization**  
+   Each amino acid was converted into an integer index using a vocabulary of unique amino acids.
 4. **Embedding**  
    An embedding layer was used to convert integer-encoded sequences into dense vectors, allowing the model to learn a representation of amino acids in a continuous space.
 
 ## 4. Methods
+### 4.1 Model Architecture
 A sequence classification model is built using an LSTM-based architecture:
 
-- Embedding layer: Converts integer-encoded amino acids into fixed-dimensional dense vectors.
+| Layer                     | Description                                                                 |
+|---------------------------|-----------------------------------------------------------------------------|
+| Embedding                 | Converts amino acid indices to dense vectors, embedding dimension = 128     |
+| LSTM                      | Single-layer, bidirectional, hidden size = 256, `batch_first=True`          |
+| Fully Connected (Linear)  | Maps LSTM output to the number of classes                                   |
+| Softmax                   | Produces class probabilities                                                |
 
-- LSTM layer: Captures long-range dependencies in amino acid sequences and learns sequential patterns.
-
-- Fully connected layer: Outputs the classification logits for the 10 selected protein classes.
-
-- Loss function: Cross-entropy loss is used for multi-class classification.
-
-- Optimizer: Adam optimizer with an initial learning rate of 0.001.
-
-- The model is trained for 20 epochs with early stopping based on validation accuracy.
+### 4.2 Training Configuration
+- **Optimizer**: Adam (`lr=0.001`)
+- **Loss Function**: CrossEntropyLoss
+- **Batch Size**: 64
+- **Number of Epochs**: 20
+- **Shuffle**: Enabled for training set
+- **Learning Rate Scheduler**: ReduceLROnPlateau
 
 ## 5. Results
 The training process shows that the loss decreases steadily while accuracy improves over epochs, indicating effective learning. The final training accuracy reaches **97.09%** after 20 epochs. The loss and training acuracy in each epoch are shown in the figure below.
 ![curves](figs/curve.png)
 
-The model achieves a high classification accuracy of **94.22%** on the test set, suggesting that the LSTM effectively captures sequence patterns in the protein data. The confussion matrix on the test set is shown in the figure below.
+The model achieves a high classification accuracy of **94.22%** on the test set, suggesting that the LSTM effectively captures sequence patterns in the protein data. The confussion matrix on the test set is shown in the figure below. From the confusion matrix, we observed that certain classes exhibited higher confusion, which may be due to structural similarities in their amino acid patterns or an imbalance in sample size.
 ![confussion matrix](figs/cm.png)
 ## 6. Discussion
 The experimental results demonstrate that an LSTM-based approach can achieve high accuracy in protein classification, even with a relatively simple architecture. However, there are several limitations and possible improvements:
