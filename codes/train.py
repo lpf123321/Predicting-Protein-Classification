@@ -23,12 +23,13 @@ labels_str = df_top10['classification'].tolist()
 
 # 1. 整数编码字典
 MIN_LEN = 10
-MAX_LEN = 600
+MAX_LEN = 600 # 只考虑长度为10至600的序列
 amino_acids = 'ACDEFGHIKLMNPQRSTVWY'
 aa_to_int = {aa: i + 1 for i, aa in enumerate(amino_acids)}  # 0用于padding
 
 
 def seq_to_int(seq):
+    '''将一个氨基酸序列转化为一个向量'''
     return torch.tensor([aa_to_int.get(aa, 0) for aa in seq], dtype=torch.long)
 
 
@@ -88,6 +89,7 @@ class ProteinRNN(nn.Module):
         self.fc = nn.Linear(hidden_dim * 2, output_dim)
 
     def forward(self, x, lengths):
+        '''embedding层+双向LSTM+全连接层'''
         embedded = self.embedding(x)
         packed = pack_padded_sequence(embedded, lengths.cpu(), batch_first=True, enforce_sorted=False)
         _, (hidden, cell) = self.rnn(packed)  # hidden: (num_directions, batch, hidden_dim)
@@ -163,4 +165,5 @@ plt.title('Confusion Matrix with Class Names')
 plt.xticks(rotation=45, ha='right')
 plt.yticks(rotation=0)
 plt.tight_layout()
+
 plt.show()
