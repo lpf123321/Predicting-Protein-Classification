@@ -1,4 +1,4 @@
-# Predicting-Protein-Classification
+# Experiment report
 
 ## 1. Introduction
 Protein is a kind of macromolecule made up of long amino acid chains, and the sequence of the chain plays a vital role in how the protein folds as well as its function.  
